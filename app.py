@@ -2,6 +2,7 @@ import streamlit as st
 import yt_dlp as youtube_dl
 import whisper
 import os
+import time
 from openai_analysis import analyze_transcription  # Importar la función de análisis
 
 # Función para descargar el video de YouTube como archivo MP3
@@ -26,35 +27,46 @@ def transcribe_audio_with_whisper(audio_path):
 
 # Interfaz con Streamlit
 def main():
-    st.title("Transcripción y Análisis de Videos de YouTube con IA")
+    st.title("🎧 Transcribe y Analiza")
 
-    # Entrada de URL de YouTube
-    youtube_url = st.text_input("Introduce la URL del video de YouTube")
+    # Inicializar mensajes si no existen en el estado de la sesión
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
 
-    if st.button("Descargar, Transcribir y Analizar"):
-        if youtube_url:
-            # Definir el archivo de salida sin extensión .mp3
-            output_path = './content/audio'
+    # Renderizar mensajes previos
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-            # Descargar el audio de YouTube
-            st.write("Descargando el audio...")
+    # Entrada de URL de YouTube en formato chat
+    if youtube_url := st.chat_input("Introduce la URL del video de YouTube"):
+        # Guardar el mensaje del usuario
+        st.session_state.messages.append({"role": "user", "content": youtube_url})
+        with st.chat_message("user"):
+            st.markdown(youtube_url)
+
+        # Definir el archivo de salida sin extensión .mp3
+        output_path = './content/audio'
+
+        # Proceso de descarga, transcripción y análisis con loaders
+        with st.spinner("📥 Descargando el audio..."):
+            time.sleep(2)  # Simulación del tiempo de descarga
             download_audio_from_youtube(youtube_url, output_path)
-            st.write("Descarga completa.")
 
-            # Transcribir el audio con Whisper
-            st.write("Procesando el audio con Whisper...")
-            transcription = transcribe_audio_with_whisper(output_path + '.mp3')  # Agregar la extensión para Whisper
-            st.write("Transcripción completa:")
-            st.write(transcription)
+        with st.spinner("🎙️ Procesando el audio..."):
+            time.sleep(2)  # Simulación del tiempo de procesamiento
+            transcription = transcribe_audio_with_whisper(output_path + '.mp3')
 
-            # Análisis de la transcripción usando GPT-4
-            st.write("Analizando la transcripción con GPT-4...")
-            analysis = analyze_transcription(transcription)  # Llamada a la función de análisis
-            st.write("Análisis completo:")
-            st.write(analysis)
+        with st.spinner("🤖 Analizando la transcripción..."):
+            time.sleep(2)  # Simulación del tiempo de análisis
+            analysis = analyze_transcription(transcription)
 
-        else:
-            st.error("Por favor, introduce una URL válida de YouTube.")
+        # Mostrar el análisis en el chat como respuesta de la IA
+        with st.chat_message("ai"):
+            st.markdown(analysis)
+        
+        # Guardar el mensaje de la IA en el estado de la sesión
+        st.session_state.messages.append({"role": "assistant", "content": analysis})
 
 if __name__ == "__main__":
     main()
