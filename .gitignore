@@ -127,6 +127,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+whisper/
+.whisper/
 
 # Spyder project settings
 .spyderproject
