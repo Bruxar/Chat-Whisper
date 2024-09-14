@@ -2,6 +2,7 @@ import streamlit as st
 import yt_dlp as youtube_dl
 import whisper
 import os
+from openai_analysis import analyze_transcription  # Importar la función de análisis
 
 # Función para descargar el video de YouTube como archivo MP3
 def download_audio_from_youtube(youtube_url, output_path='./content/audio'):
@@ -45,6 +46,12 @@ def main():
             transcription = transcribe_audio_with_whisper(output_path + '.mp3')  # Agregar la extensión para Whisper
             st.write("Transcripción completa:")
             st.write(transcription)
+
+            # Análisis de la transcripción usando GPT-4
+            st.write("Analizando la transcripción con GPT-4...")
+            analysis = analyze_transcription(transcription)  # Llamada a la función de análisis
+            st.write("Análisis completo:")
+            st.write(analysis)
 
         else:
             st.error("Por favor, introduce una URL válida de YouTube.")
