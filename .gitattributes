@@ -1,1 +1,6 @@
-*.3 linguist-documentation
+README.md linguist-documentation=true
+LICENSE linguist-documentation=true
+docs/* linguist-documentation=true
+*.txt linguist-documentation=true
+
+*.py linguist-language=Python
