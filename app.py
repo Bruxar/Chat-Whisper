@@ -1,29 +1,8 @@
 import streamlit as st
-import yt_dlp as youtube_dl
-import whisper
-import os
 import time
-from openai_analysis import analyze_transcription  # Importar la función de análisis
-
-# Función para descargar el video de YouTube como archivo MP3
-def download_audio_from_youtube(youtube_url, output_path='./content/audio'):
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-        'outtmpl': output_path,  # Sin la extensión .mp3, yt-dlp la agregará automáticamente
-    }
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([youtube_url])
-
-# Función para procesar el audio con Whisper
-def transcribe_audio_with_whisper(audio_path):
-    model = whisper.load_model("small")  # Cargar el modelo Whisper
-    result = model.transcribe(audio_path)
-    return result["text"]
+from youtube_handler import download_audio_from_youtube
+from whisper_handler import transcribe_audio_with_whisper
+from openai_analysis import analyze_transcription
 
 # Interfaz con Streamlit
 def main():
@@ -64,7 +43,7 @@ def main():
         # Mostrar el análisis en el chat como respuesta de la IA
         with st.chat_message("ai"):
             st.markdown(analysis)
-        
+
         # Guardar el mensaje de la IA en el estado de la sesión
         st.session_state.messages.append({"role": "assistant", "content": analysis})
 
