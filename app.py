@@ -38,30 +38,28 @@ def main():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Deshabilitar el input si se está procesando un video
-    if not st.session_state.processing:
-        # Entrada de URL de YouTube en formato chat
-        youtube_url = st.chat_input("Introduce la URL del video de YouTube")
-        
-        if youtube_url:
-            # Validar si el input es una URL válida
-            if is_valid_url(youtube_url):
-                # Limpiar el historial del chat antes de procesar
-                clean_message()  # Vaciar los mensajes en el estado de la sesión
-                st.session_state.messages.append({"role": "system", "content": "🧹 El chat ha sido limpiado."})
-                st.session_state.valid_url = youtube_url  # Guardar la URL válida en el estado de la sesión
-                st.rerun()  # Volver a ejecutar la aplicación con el chat limpio
-            else:
-                # Mostrar mensaje de error si no es una URL válida
-                error_message = "⚠️ Por favor, introduce una URL de YouTube válida."
-                st.session_state.messages.append({"role": "assistant", "content": error_message})
-                with st.chat_message("assistant"):
-                    st.markdown(error_message)
+    # Verificar si está en proceso
+    if st.session_state.processing:
+        # Si el procesamiento está en curso, simplemente ignoramos cualquier nuevo input
+        return
 
-    # Bloquear el chat input cuando se está procesando
-    else:
-        st.write("⏳ Procesando... Por favor espera.")
-        
+    # Si no está en proceso, permitir al usuario enviar una URL de YouTube
+    youtube_url = st.chat_input("Introduce la URL del video de YouTube")
+    
+    if youtube_url:
+        # Validar si el input es una URL válida
+        if is_valid_url(youtube_url):
+            # Limpiar el historial del chat antes de procesar
+            clean_message()  # Vaciar los mensajes en el estado de la sesión
+            st.session_state.valid_url = youtube_url  # Guardar la URL válida en el estado de la sesión
+            st.rerun()  # Volver a ejecutar la aplicación con el chat limpio
+        else:
+            # Mostrar mensaje de error si no es una URL válida
+            error_message = "⚠️ Por favor, introduce una URL de YouTube válida."
+            st.session_state.messages.append({"role": "assistant", "content": error_message})
+            with st.chat_message("assistant"):
+                st.markdown(error_message)
+
     # Después de recargar, continuar el proceso solo si hay una URL válida
     if "valid_url" in st.session_state and not st.session_state.processing:
         youtube_url = st.session_state.valid_url
